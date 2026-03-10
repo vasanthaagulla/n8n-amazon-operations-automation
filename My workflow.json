@@ -1,0 +1,190 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        -224
+      ],
+      "id": "8b03a518-fc7b-40e4-ac6a-c128e5d550b3",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1fbp5RCMn80XmRI9IHp2cwta-UT0aMTU-fyMej2pBYwM",
+          "mode": "list",
+          "cachedResultName": "Amazon_57_Records",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fbp5RCMn80XmRI9IHp2cwta-UT0aMTU-fyMej2pBYwM/edit?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -464,
+        -128
+      ],
+      "id": "a4aff5c3-80fe-4d8d-9bbd-5ccd05b247a2",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "37ZwgynAzWYMCuSJ",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -272,
+        -224
+      ],
+      "id": "2dcd803e-a67a-49da-ae51-e063b91a9e49",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const seen = new Set();\nconst result = [];\n\nfor (const item of items) {\n\n  const orderId = item.json[\"Order ID\"];\n\n  if (seen.has(orderId)) continue;\n  seen.add(orderId);\n\n  // random TAT between 1 and 48 hrs\n  const tat = Math.floor(Math.random() * 48) + 1;\n\n  const sla = tat <= 24 ? \"YES\" : \"NO\";\n  const aht = (tat * 60 / 10).toFixed(2);\n\n  result.push({\n    json: {\n      \"Order ID\": item.json[\"Order ID\"],\n      \"Customer\": item.json[\"Customer\"],\n      \"Product\": item.json[\"Product\"] || \"N/A\",\n      \"TAT (hrs)\": tat,\n      \"SLA Status\": sla,\n      \"AHT (min)\": aht\n    }\n  });\n\n}\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        -112
+      ],
+      "id": "5f3aacdd-3038-40fe-b339-f724592010d6",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        -256
+      ],
+      "id": "a140a5be-02af-4b5b-871d-770a7007a352",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "sendTo": "vasanthaagulla99@gmail.com",
+        "subject": "hello",
+        "message": "final report",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        -144
+      ],
+      "id": "8571951c-d98d-4204-8ccf-038a8b892f56",
+      "name": "Send a message",
+      "webhookId": "c21cda87-61e5-4aac-889b-4ce70325907b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "IjY2xjKAZMZbBtNa",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "1e52e4d7-9a62-4fe6-8908-9ea69150a5b1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "84cb3d398b943bebe2f441d8600950a7b7b0ff85385cacc181abf178e2a24955"
+  },
+  "id": "LkSJVMswDgWHYzaY",
+  "tags": []
+}
